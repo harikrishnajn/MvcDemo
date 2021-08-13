@@ -1,0 +1,306 @@
+﻿@{
+    ViewBag.Title = "SinalRChat";
+}
+<style>
+    .container23 {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+</style>
+
+@section scripts{
+    @Scripts.Render("~/Scripts/jquery-ui-1.9.2.min.js")
+    @Scripts.Render("~/Scripts/jquery.signalR-1.0.1.min.js")
+    @Scripts.Render("/signalr/hubs")
+
+    <script type="text/javascript">
+        var Allusers = new Array();
+        var currentMyid = $.connection.hub.id;
+        var MessagesInfo = new Array();
+        $(document).ready(() => {
+            $('#users').change(() => {
+                debugger;
+                $('ul.chat-box').attr("hidden", true);
+                $('.border').removeClass('selected');
+                var selecteduser = $('#users').val();
+                if (selecteduser == 'All') {
+                    $('#' + $.connection.hub.id).removeAttr("hidden");
+                }
+                else {
+                    $('#' + selecteduser).removeAttr("hidden");
+                }
+                $('#border_' + selecteduser).addClass('selected');
+                for (var i = 0; i < MessagesInfo.length; i++) {
+                    if (selecteduser == MessagesInfo[i].Name) {
+                        MessagesInfo[i].Count = 0;
+                        $('#border_' + selecteduser).removeClass("Messages");
+                    }
+                }
+            });
+        });
+
+        startChartHub();
+        function startChartHub() {
+            var chat = $.connection.chatHub;
+            // Get the user name.
+            $('#nickname').val($.connection.hub.id);
+            console.log($.connection.hub.id)
+            chat.client.differentName = function (name) {
+                $('#nickname').val($.connection.hub.id);
+                chat.server.notify($.connection.hub.id, $.connection.hub.id);
+                Allusers.push($.connection.hub.id);
+                $('#differentmessagebox').append('<ul class="chat-box chatContainerScroll" id="' + Id + '" hidden></ul>');
+            };
+            chat.client.online = function (name) {
+                console.log("name", name)
+                console.log("connectionid", $.connection.hub.id)
+                if (name == $.connection.hub.id) {
+                    // $('#onlineusers').append('<div class="border" id="Userborder_' + name + '" style="background:black">You:' + name + '</div>');
+                    $('#differentmessagebox').append('<ul class="chat-box chatContainerScroll" id="' + name + '"></ul>');
+                }
+                else {
+                    $('#differentmessagebox').append('<ul class="chat-box chatContainerScroll" id="' + name + '" hidden></ul>')
+                    $('#onlineusers').append('<div class="border"  id="border_' + name + '">' + name + '</div>');
+                    $("#users").append('<option value="' + name + '">' + name + '</option>');
+                    //Allusers.push(name);
+                }
+                $('.border').on('click', (e) => {
+                    var selecteduser = e.target.id.split('border_')[1];
+                    $('ul.chat-box').attr("hidden", true);
+                    $('.border').removeClass('selected');
+                    //var selecteduser = $('#users').val();
+                    $('#users').val(selecteduser);
+                    $('#' + selecteduser).removeAttr("hidden");
+                    $('#border_' + selecteduser).addClass('selected');
+                    document.getElementById('onlineusersdet').innerHTML = '';
+                    $('#onlineusersdet').append('<div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9"><div class="selected-user">' + selecteduser + '</div ></div >')
+                    for (var i = 0; i < MessagesInfo.length; i++) {
+                        if (selecteduser == MessagesInfo[i].Name) {
+                            MessagesInfo[i].Count = 0;
+                            $('#border_' + selecteduser).removeClass("Messages");
+                            $()
+                            $('#border_' + selecteduser + '>span').html('');
+                        }
+                    }
+                });
+            };
+
+            chat.client.enters = function (name) {
+                $('#chatlog').append('<div style="font-style:italic;"><i>' + name + ' joins the conversation</i></div>');
+                $("#users").append('<option value="' + name + '">' + name + '</option>');
+                $('#onlineusers').append('<div class="border" id="border_' + name + '">' + name + '</div>');
+                $('#differentmessagebox').append('<ul class="chat-box chatContainerScroll" id="' + name + '" hidden></ul>')
+                $('.border').on('click', (e) => {
+                    //debugger;
+                    var selecteduser = e.target.id.split('border_')[1]
+                    $('ul.chat-box').attr("hidden", true);
+                    $('.border').removeClass('selected');
+                    // var selecteduser = $('#users').val();
+                    $('#' + selecteduser).removeAttr("hidden");
+                    $('#users').val(selecteduser);
+                    $('#border_' + selecteduser).addClass('selected');
+                    document.getElementById('onlineusersdet').innerHTML = '';
+                    $('#onlineusersdet').append('<div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9"><div class="selected-user">' + selecteduser + '</div ></div >')
+                    for (var i = 0; i < MessagesInfo.length; i++) {
+                        if (selecteduser == MessagesInfo[i].Name) {
+                            MessagesInfo[i].Count = 0;
+                            $('#border_' + selecteduser).removeClass("Messages");
+                            $('#border_' + selecteduser + '>span').html('');
+                        }
+                    }
+                });
+            };
+            // Create a function that the hub can call to broadcast chat messages.
+            chat.client.broadcastMessage = function (name, message) {
+                //debugger;
+                console.log($.connection.hub.id);
+                //Interpret smileys
+                message = message.replace(":)", "<img src=\"/images/smile.gif\" class=\"smileys\" />");
+                message = message.replace("lol", "<img src=\"/images/laugh.gif\" class=\"smileys\" />");
+                message = message.replace(":o", "<img src=\"/images/cool.gif\" class=\"smileys\" />");
+                var current = new Date();
+                var Same = false;
+                var Count = 0;
+                //display the message
+                $("#" + name).append('<li class="chat-left"><div class="chatContentSection"><div class="chat-name">' + name + '</div><div class="chat-text">' + message + '</div></div><div class="chat-hour">' + current.getHours() + ':' + current.getMinutes() + '</div > ');
+                for (var i = 0; i < MessagesInfo.length; i++) {
+                    if (MessagesInfo[i].Name == name) {
+                        MessagesInfo[i].Count == isNaN(MessagesInfo[i].Count) ? Count : MessagesInfo[i].Count + 1;
+                        //MessagesInfo[i].Count = Count;
+                        //MessagesInfo[i].Count
+                        if ($('#users').val() != name) {
+                            $('#border_' + name).append('<span class="Messagenotify">+</span>');
+                            $('#border_' + name).addClass("Messages");
+                        }
+                        Same = true;
+                        break;
+                    }
+                }
+                if (!Same) {
+                    var Info = new Object();
+                    Info.Name = name;
+                    Count += 1;
+                    Info.Count = Count;
+                    MessagesInfo.push(Info);
+                    if ($('#users').val() != name) {
+                        $('#border_' + name).append('<span class="Messagenotify">+</span>');
+                        $('#border_' + name).addClass("Messages");
+                    }
+                }
+            };
+
+            chat.client.disconnected = function (name) {
+                //Calls when someone leaves the page
+                $('#chatlog').append('<div style="font-style:italic;"><i>' + name + ' leaves the conversation</i></div>');
+                $('#onlineusers div').remove(":contains('" + name + "')");
+                $("#users option").remove(":contains('" + name + "')");
+            }
+
+            // Start the connection.
+            $.connection.hub.start().done(function () {
+                //debugger;
+                var current = new Date();
+                var Id = $('selected');
+                //Calls the notify method of the server
+                chat.server.notify($.connection.hub.id, $.connection.hub.id);
+                $('#btnsend').click(function () {
+                    if ($("#users").val() == "All") {
+                        // Call the Send method on the hub.
+                        chat.server.send($.connection.hub.id, $('#message').val());
+                        //var messagedetail = $('#users').val();
+                        //$('#' + messagedetail).append('<li class="chat-right"><div class="chatContentSection"><div class="chat-name">' + $.connection.hub.id + '</div><div class="chat-text">' + differentmessage + '</div></div><div class="chat-hour">' + current.getHours() + ':' + current.getMinutes() + ' </div > ');
+                    }
+                    else {
+                        chat.server.sendToSpecific($.connection.hub.id, $('#message').val(), $("#users").val());
+                        var differentmessage = $('#message').val();
+                        var messagedetail = $('#users').val();
+                        $('#' + messagedetail).append('<li class="chat-right"><div class="chatContentSection"><div class="chat-name">' + $.connection.hub.id + '</div><div class="chat-text">' + differentmessage + '</div></div><div class="chat-hour">' + current.getHours() + ':' + current.getMinutes() + ' </div > ');
+                    }
+                    // Clear text box and reset focus for next comment.
+                    $('#message').val('').focus();
+                });
+            });
+        }
+    </script>
+}
+
+<button onclick="DownLoadExcel()" class="btn  btn-success" style="margin-top:20px; margin-left: -600px;">Download ChatHistory</button>
+<script>
+    function DownLoadExcel() {
+        debugger;
+        $.ajax({
+            type: "Post",
+            url: "@Url.Action("export", "ChatRoom")",
+            cache: false,
+            dataType: "Json",
+            data: {},
+            success: function (data) {
+                window.location = "@Url.Action("Download","ChatRoom")";
+            },
+            error: function (data) {
+               // Materialize.toast("Something went wrong. ", 3000, 'rounded');
+            }
+        });
+    }
+</script>
+
+<style>
+    .border:hover {
+        cursor: pointer;
+    }
+    .Messages {
+        position: relative;
+        display: inline-block;
+    }
+    .selected {
+        background: rgb(57, 250, 19);
+        color: black;
+    }
+    .Messages .Messagenotify {      
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        padding: 5px 10px;
+        border-radius: 50%;
+        background-color: red;
+        color:white
+    }
+</style>
+
+<html lang="en">
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Gallagher</title>
+    <link rel="stylesheet" href="~/Content/bootstrap.css" />
+    <link rel="stylesheet" href="~/Content/all.css" />
+    <link rel="stylesheet" href="~/Content/customStyle.css" />
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+</head>
+
+<body style="margin-top: 5%; margin-left: 140%;">
+
+    @*<div id="app">
+        {{ message }}
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            data: {
+                message: 'Hello Vue!'
+            }
+        })
+    </script>*@
+ 
+    <div class="chatIcon"><i class="far fa-comments"></i></div>
+    <div class="chat-content" id="chat-content" style="display: block;">
+        <div class="container p-0">
+            <div class="content-wrapper">
+                <div class="row gutters">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div class="card m-0">
+                            <div class="row no-gutters">
+                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
+                                    <div class="users-container">
+                                        <div class="actionpane" hidden>
+                                            <select id="users">
+                                                <option value="All">All</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="onlineusers" style="width: 100%;background: #0096b7;color: white;font-size: 15px;">
+                                            <b style="margin-left: 25%;">Connected Users</b>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
+                                    <div class="selected-user" style="width: 156%!important;" id="onlineusersdet"></div>
+                                    <div class="chat-container" id="differentmessagebox">
+                                        <div class="form-group mt-3 mb-0 sendmsg">
+                                            <textarea spellcheck="true" class="messagebox" id="message" rows="1" placeholder="Type your message here..." style="width: 90%; min-height: auto;"></textarea>
+                                            <button class="submit" value="Send" id="btnsend"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                                            @*<button id="ExportExcel" onclick="ExportExcel_Click"></button>*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/jquery.min.js"></script>
+    <script src="~/Scripts/popper.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/main.js"></script>
+</body>
+</html>

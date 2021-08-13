@@ -1,0 +1,328 @@
+﻿@{
+    ViewBag.Title = "ChatAppli";
+}
+
+<h2>Chat Application</h2>
+
+
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body 
+        {
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        .container
+        {
+            border: 2px solid #dedede;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 1px;
+            margin: 10px 0;
+            margin-right:30%;
+        }
+        .darker 
+        {
+            border-color: #ccc;
+            background-color: #ddd;
+        }
+        .container::after 
+        {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        .container img 
+        {
+            float: left;
+            max-width: 60px;
+            width: 100%;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+        .container img.right 
+        {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+
+        .time-right {
+            float: right;
+            color: #aaa;
+        }
+        .time-left 
+        {
+            float: left;
+            color: #999;
+        }
+        body 
+        {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        /* Button used to open the chat form - fixed at the bottom of the page */
+        .open-button
+        {
+            background-color: #555;
+            color: white;
+            padding: 16px 20px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.8;
+            position: fixed;
+            bottom: 23px;
+            right: 28px;
+            width: 280px;
+        }
+
+        /* The popup chat - hidden by default */
+        .chat-popup 
+        {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            right: 15px;
+            border: 3px solid #f1f1f1;
+            z-index: 9;
+        }
+
+        /* Add styles to the form container */
+        .form-container {
+            /*max-width: 300px;
+            padding: 10px;
+            background-color: white;*/
+            margin: 4px, 4px;
+            padding: 4px;
+            background-color: white;
+           width: 300px;
+            height: 650px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align: justify;
+        }
+
+            /* Full-width textarea */
+        .form-container textarea 
+        {
+            width: 100%;
+            padding: 1px;
+            margin: 5px 0 22px 0;
+            border: none;
+            background: #f1f1f1;
+            resize: none;
+            min-height: 50px;
+        }
+
+         /* When the textarea gets focus, do something */
+        .form-container textarea:focus
+        {
+           background-color: #ddd;
+           outline: none;
+        }
+
+         /* Set a style for the submit/send button */
+        .form-container .btn 
+        {
+           background-color: #04AA6D;
+           color: white;
+           padding: 16px 20px;
+           border: none;
+           cursor: pointer;
+           width: 100%;
+           margin-bottom: 10px;
+           opacity: 0.8;
+        }
+
+        .chat-rights 
+        {
+            background-color: #0096b7;
+            margin-left:30%;
+            border-radius: 5px;
+            padding: 1px;
+            margin: 10px 0;
+            margin-left:30%;
+        }
+
+        .chat-rightss {
+            background-color: #0096b7;
+            margin-left: 30%;
+            border-radius: 5px;
+            padding: 1px;
+            margin: 10px 0;
+            margin-left: 30%;
+        }
+
+        /* Add a red background color to the cancel button */
+        .form-container .cancel 
+        {
+           background-color: red;
+        }
+
+       /* Add some hover effects to buttons */
+        .form-container .btn:hover, .open-button:hover 
+        {
+           opacity: 1;
+        }
+        .open-button
+        {
+            border: 1px transparent;
+            -webkit-border-radius: 40px;
+            border-radius: 40px;
+            color: #eeeeee;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Arial;
+            font-size: 20px;
+            padding: 8px 30px;
+            text-align: center;
+            text-decoration: none;
+            margin-left: 20px;
+            -webkit-animation: glowing 1300ms infinite;
+            -moz-animation: glowing 1300ms infinite;
+            -o-animation: glowing 1300ms infinite;
+            animation: glowing 1300ms infinite;
+        }
+      @@-webkit-keyframes glowing
+      {
+        0% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+        50% {
+          background-color: #21c7ed;
+          -webkit-box-shadow: 0 0 15px #21c7ed;
+        }
+        100% {
+          background-color: #0091b2;
+          -webkit-box-shadow: 0 0 3px #0091b2;
+        }
+      }
+
+    </style>
+</head>
+<body>
+
+    @*<h2>Popup Chat Window</h2>
+    <p>Click on the button at the bottom of this page to open the chat form.</p>
+    <p>Note that the button and the form is fixed - they will always be positioned to the bottom of the browser window.</p>*@
+
+    <button class="open-button" onclick="openForm()">ChatBot</button>
+    <script>
+        var current = new Date();
+        var today = new Date();
+        document.getElementById('time').innerHTML = today;
+    </script>
+    <div class="chat-popup" id="myForm">
+        <div class="form-container">
+            <h1>Canarys</h1>
+            <div id="ChatForm">
+                <div class="container">
+                    @*<alt="Avatar" style="width:100%;">*@
+                    <p class="chat-right">
+                        Can You Provide Your Details..</br>
+                        <button onclick="yes()" id="yes">Yes</button>
+                        <button onclick="No()" id="No">No</button>
+                    </p>
+                    <span id="datetime" style="margin-left:50%"></span>
+                    <script>
+                        var dt = new Date();
+                        document.getElementById("datetime").innerHTML = dt.toLocaleTimeString();
+                    </script>
+                </div>
+            </div>
+
+            <label for="msg"><b>Message</b></label>
+            <textarea id="TypeMessage" placeholder="Type message.." name="msg" required></textarea>
+            <button onclick="SendMessage()" class="btn">Send</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        var conditions = 0;
+        function SendMessage()
+        {
+            if (conditions == 1)
+            {
+                var message = document.getElementById('TypeMessage').value
+                var pattern = /^(([^<>()[\]\\.,;:\s@@"]+(\.[^<>()[\]\\.,;:\s@@"]+)*)|(".+"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if (message.match(pattern)) {
+                    conditions = 2;
+                    document.getElementById('ChatForm').innerHTML += '<div class="chat-rights"><p>' + message + '</p></div>';
+                    document.getElementById('ChatForm').innerHTML += '<div class="container"><p>May i know your good name please</p></div>';
+                    document.getElementById('TypeMessage').value = "";
+                    return;
+                }
+                else {
+                    if (message == "")
+                    {
+                        var message = document.getElementById('TypeMessage').value
+                        document.getElementById('ChatForm').innerHTML += '<div class="chat-rightss"><p>' + message + '</p></div>';
+                        document.getElementById('ChatForm').innerHTML += '<div class="container"><p>Please give the email id..</p></div>';
+                        document.getElementById('TypeMessage').value = "";
+                        return;
+                    }
+                    else
+                    {
+                        var message = document.getElementById('TypeMessage').value
+                        document.getElementById('ChatForm').innerHTML += '<div class="chat-rightss"><p>' + message + '</p></div>';
+                        document.getElementById('ChatForm').innerHTML += '<div class="container"><p>This is invalid email ID.. Please give the valid email id..</p></div>';
+                    }
+                }
+            }
+            if (conditions == 2)
+            {
+                var message = document.getElementById('TypeMessage').value
+                if (message != "")
+                {
+                    conditions = 3;
+                    document.getElementById('ChatForm').innerHTML += '<div class="chat-rights"><p>' + message + '</p></div>';             
+                    document.getElementById('ChatForm').innerHTML += '<div class="container"><p> your Response Have been saved..</p></div>';
+                    document.getElementById('TypeMessage').value = "";
+                    return;
+                }
+                else
+                {
+                    document.getElementById('ChatForm').innerHTML += '<div class="container"><p>Please give the valid email id..</p></div>';
+                    document.getElementById('TypeMessage').value = "";
+                    return;
+                }
+            }
+        }
+
+        function yes()
+        {
+            var current = new Date();
+            document.getElementById('ChatForm').innerHTML += '<div class="chat-rights"><p>Yes</p></div>';
+            document.getElementById('ChatForm').innerHTML += '<div class="container"><p>May I have Your email ID?</p></div>';
+            conditions = 1;
+        }
+        function No()
+        {
+            document.getElementById('ChatForm').innerHTML += '<div class="chat-rights"><p>No</p></div>';
+            document.getElementById('ChatForm').innerHTML += '<div class="container"><p>Thanks For visiting.</p></div>';
+        }
+
+        function openForm()
+        {
+             document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm()
+        {
+             document.getElementById("myForm").style.display = "none";
+        }
+    </script>
+
+</body>
+</html>
